@@ -1,0 +1,48 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'notification.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+AppNotification _$AppNotificationFromJson(Map<String, dynamic> json) =>
+    AppNotification(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      message: json['message'] as String,
+      type: $enumDecode(_$NotificationTypeEnumMap, json['type']),
+      targetId: json['targetId'] as String?,
+      targetType: json['targetType'] as String?,
+      recipientId: json['recipientId'] as String,
+      isRead: json['isRead'] as bool,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      metadata: json['metadata'] as Map<String, dynamic>,
+    );
+
+Map<String, dynamic> _$AppNotificationToJson(AppNotification instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'title': instance.title,
+      'message': instance.message,
+      'type': _$NotificationTypeEnumMap[instance.type]!,
+      'targetId': instance.targetId,
+      'targetType': instance.targetType,
+      'recipientId': instance.recipientId,
+      'isRead': instance.isRead,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'metadata': instance.metadata,
+    };
+
+const _$NotificationTypeEnumMap = {
+  NotificationType.info: 'info',
+  NotificationType.success: 'success',
+  NotificationType.warning: 'warning',
+  NotificationType.error: 'error',
+  NotificationType.itemUpdate: 'item_update',
+  NotificationType.counterUpdate: 'counter_update',
+  NotificationType.assignment: 'assignment',
+  NotificationType.counterRoom: 'counter_room',
+  NotificationType.item: 'item',
+  NotificationType.user: 'user',
+};
