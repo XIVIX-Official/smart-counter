@@ -112,19 +112,21 @@ class MockQrService extends _i1.Mock implements _i3.QrService {
       ) as _i4.Future<_i2.QrCode>);
 
   @override
-  _i4.Future<_i5.Uint8List> generateQrCode(String? code) => (super.noSuchMethod(
+  _i4.Future<_i5.Uint8List> generateQrCode(String code, {double size = 200.0}) => (super.noSuchMethod(
         Invocation.method(
           #generateQrCode,
           [code],
+          {#size: size},
         ),
         returnValue: _i4.Future<_i5.Uint8List>.value(_i5.Uint8List(0)),
       ) as _i4.Future<_i5.Uint8List>);
 
   @override
-  _i4.Future<_i2.QrCode?> getQrCodeByCode(String? code) => (super.noSuchMethod(
+  _i4.Future<_i2.QrCode?> getQrCodeByCode(String code, {bool forceRefresh = false}) => (super.noSuchMethod(
         Invocation.method(
           #getQrCodeByCode,
           [code],
+          {#forceRefresh: forceRefresh},
         ),
         returnValue: _i4.Future<_i2.QrCode?>.value(),
       ) as _i4.Future<_i2.QrCode?>);

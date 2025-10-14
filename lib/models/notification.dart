@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 part 'notification.g.dart';
 
@@ -34,6 +35,26 @@ class AppNotification {
 
   // To JSON
   Map<String, dynamic> toJson() => _$AppNotificationToJson(this);
+
+  // From FCM Message
+  factory AppNotification.fromMessage(RemoteMessage message) {
+    final data = message.data;
+    return AppNotification(
+      id: data['id'] as String,
+      title: message.notification?.title ?? '',
+      message: message.notification?.body ?? '',
+      type: NotificationType.values.firstWhere(
+        (e) => e.toString().split('.').last == data['type'],
+        orElse: () => NotificationType.info,
+      ),
+      targetId: data['targetId'] as String?,
+      targetType: data['targetType'] as String?,
+      recipientId: data['recipientId'] as String,
+      isRead: false,
+      createdAt: DateTime.now(),
+      metadata: Map<String, dynamic>.from(data['metadata'] ?? {}),
+    );
+  }
 
   // Copy with
   AppNotification copyWith({

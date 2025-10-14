@@ -94,14 +94,14 @@ class QrController extends GetxController {
     }
   }
 
-  Future<Uint8List> generateQrCode(String code) async {
+  Future<Uint8List> generateQrCode(QrCode qrCode) async {
     try {
       _isLoading.value = true;
       _error.value = null;
 
-      final qrImage = await _qrService.generateQrCode(code);
-      _logger.debug('Generated QR code image for code');
-      return qrImage;
+      final image = await _qrService.generateQrCode(qrCode.code);
+      _logger.debug('Generated QR code image');
+      return image;
     } catch (e) {
       _logger.error('Failed to generate QR code image', e);
       _error.value = 'Failed to generate QR code image: ${e.toString()}';

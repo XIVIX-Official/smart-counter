@@ -4,8 +4,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../models/notification.dart' as app;
 import '../utils/logger.dart';
 import 'api_service.dart';
-import 'storage_service.dart';
-
 class NotificationService {
   // Singleton instance
   static final NotificationService _instance = NotificationService._internal();
@@ -16,16 +14,15 @@ class NotificationService {
   final _messaging = FirebaseMessaging.instance;
   late final FlutterLocalNotificationsPlugin _localNotifications;
   final _apiService = ApiService();
-  final _storageService = StorageService();
   final _logger = AppLogger();
+
+  // Callback handlers
+  late Function(app.AppNotification) _onMessageCallback;
+  late Function(app.AppNotification) _onMessageOpenedAppCallback;
 
   // Stream controllers
   final _notificationController =
       StreamController<app.AppNotification>.broadcast();
-
-  // Message handlers
-  Function(app.AppNotification)? _onMessageCallback;
-  Function(app.AppNotification)? _onMessageOpenedAppCallback;
 
   // Getters
   Stream<app.AppNotification> get notificationStream =>
@@ -92,8 +89,14 @@ class NotificationService {
       await _requestPermission();
 
       // Configure FCM
-      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-      FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
+      FirebaseMessaging.onMessage.listen((message) {
+        final notification = app.AppNotification.fromMessage(message);
+        _onMessageCallback(notification);
+      });
+      FirebaseMessaging.onMessageOpenedApp.listen((message) {
+        final notification = app.AppNotification.fromMessage(message);
+        _onMessageOpenedAppCallback(notification);
+      });
       FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
 
       // Get FCM token
@@ -147,26 +150,11 @@ class NotificationService {
     }
   }
 
-  // Handle foreground message
-  Future<void> _handleForegroundMessage(RemoteMessage message) async {
-    try {
-      final notification = _parseNotification(message);
-      if (notification != null) {
-        _notificationController.add(notification);
-        await _showLocalNotification(notification);
-      }
-    } catch (e) {
-      _logger.error('Error handling foreground message', e);
-    }
-  }
-
   // Handle background message
   Future<void> _handleBackgroundMessage(RemoteMessage message) async {
     try {
-      final notification = _parseNotification(message);
-      if (notification != null) {
-        _notificationController.add(notification);
-      }
+      final notification = app.AppNotification.fromMessage(message);
+      _notificationController.add(notification);
     } catch (e) {
       _logger.error('Error handling background message', e);
     }
@@ -182,49 +170,9 @@ class NotificationService {
     }
   }
 
-  // Parse FCM message to app notification
-  app.AppNotification? _parseNotification(RemoteMessage message) {
-    try {
-      final data = message.data;
-      return app.AppNotification(
-        id: data['id'] ?? '',
-        title: message.notification?.title ?? '',
-        message: message.notification?.body ?? '',
-        type: _parseNotificationType(data['type']),
-        targetId: data['targetId'],
-        targetType: data['targetType'],
-        recipientId: data['recipientId'] ?? '',
-        isRead: false,
-        createdAt: DateTime.now(),
-        metadata: data,
-      );
-    } catch (e) {
-      _logger.error('Error parsing notification', e);
-      return null;
-    }
-  }
+  // Private helper methods
 
-  // Parse notification type
-  app.NotificationType _parseNotificationType(String? type) {
-    switch (type) {
-      case 'info':
-        return app.NotificationType.info;
-      case 'success':
-        return app.NotificationType.success;
-      case 'warning':
-        return app.NotificationType.warning;
-      case 'error':
-        return app.NotificationType.error;
-      case 'item_update':
-        return app.NotificationType.itemUpdate;
-      case 'counter_update':
-        return app.NotificationType.counterUpdate;
-      case 'assignment':
-        return app.NotificationType.assignment;
-      default:
-        return app.NotificationType.info;
-    }
-  }
+
 
   // Show local notification
   Future<void> _showLocalNotification(app.AppNotification notification) async {
