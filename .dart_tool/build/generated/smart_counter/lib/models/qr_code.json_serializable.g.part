@@ -1,0 +1,34 @@
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+QrCode _$QrCodeFromJson(Map<String, dynamic> json) => QrCode(
+      id: json['id'] as String,
+      code: json['code'] as String,
+      type: $enumDecode(_$QrCodeTypeEnumMap, json['type']),
+      targetId: json['targetId'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      expiresAt: json['expiresAt'] == null
+          ? null
+          : DateTime.parse(json['expiresAt'] as String),
+      isActive: json['isActive'] as bool,
+      metadata: json['metadata'] as Map<String, dynamic>,
+    );
+
+Map<String, dynamic> _$QrCodeToJson(QrCode instance) => <String, dynamic>{
+      'id': instance.id,
+      'code': instance.code,
+      'type': _$QrCodeTypeEnumMap[instance.type]!,
+      'targetId': instance.targetId,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'expiresAt': instance.expiresAt?.toIso8601String(),
+      'isActive': instance.isActive,
+      'metadata': instance.metadata,
+    };
+
+const _$QrCodeTypeEnumMap = {
+  QrCodeType.item: 'item',
+  QrCodeType.counterRoom: 'counter_room',
+  QrCodeType.temporaryAccess: 'temporary_access',
+  QrCodeType.user: 'user',
+};
