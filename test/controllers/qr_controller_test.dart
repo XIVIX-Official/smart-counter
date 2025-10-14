@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get/get.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import '../../lib/controllers/qr_controller.dart';
 import '../../lib/models/qr_code.dart';
 import '../../lib/services/qr_service.dart';
 import '../../lib/utils/logger.dart';
+import './qr_controller_test.mocks.dart';
 
 // Helper functions
 QrCode createTestQrCode(String code) => QrCode(
@@ -82,7 +82,7 @@ void main() {
         expiresAt: null,
         metadata: null,
       )).called(1);
-      verify(mockLogger.debug(any)).called(1);
+      verify(mockLogger.debug('Created QR code: test-id')).called(1);
     });
 
     test('generateQrCode generates QR code image', () async {
@@ -98,8 +98,10 @@ void main() {
       );
 
       final fakeImage = Uint8List.fromList([1, 2, 3, 4]);
-      when(mockQrService.generateQrCode(qrCode))
-          .thenAnswer((_) async => fakeImage);
+      when(mockQrService.generateQrCode(
+        qrCode.code,
+        size: 200,
+      )).thenAnswer((_) async => fakeImage);
 
       // Act
       final result = await qrController.generateQrCode(qrCode);
@@ -107,8 +109,11 @@ void main() {
       // Assert
       expect(result, equals(fakeImage));
       expect(qrController.isLoading, isFalse);
-      verify(mockQrService.generateQrCode(qrCode)).called(1);
-      verify(mockLogger.debug(any)).called(1);
+      verify(mockQrService.generateQrCode(
+        qrCode.code,
+        size: 200,
+      )).called(1);
+      verify(mockLogger.debug('Generated QR code image')).called(1);
     });
 
     test('startScanning prevents duplicate scans', () async {
@@ -119,8 +124,10 @@ void main() {
       await qrController.startScanning();
 
       // Assert
-      verifyNever(mockQrService.startScanning(onScanned: anyNamed('onScanned')));
-      verify(mockLogger.warning(any)).called(1);
+      verifyNever(mockQrService.startScanning(
+        onScanned: (_) {},
+      ));
+      verify(mockLogger.warning('QR code scanner is already running')).called(1);
     });
 
     test('stopScanning only stops if currently scanning', () async {
